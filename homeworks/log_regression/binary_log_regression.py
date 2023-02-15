@@ -96,8 +96,7 @@ class BinaryLogReg:
             np.ndarray: An `(d, )` vector which represents gradient of loss J with respect to self.weight.
         """
         m = self.mu(X, y)
-        (1 - m)
-        raise NotImplementedError("Your Code Goes Here")
+        return -((1 - m) * y @ X) / X.shape[0] + 2 * self._lambda * self.weight
 
     @problem.tag("hw3-A")
     def gradient_J_bias(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -163,7 +162,8 @@ class BinaryLogReg:
             learning_rate (float, optional): Learning rate of SGD/GD algorithm.
                 Defaults to 1e-4.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        self.weight -= self.gradient_J_weight(X, y) * learning_rate
+        self.bias -= self.gradient_J_bias(X, y) * learning_rate
 
     @problem.tag("hw3-A", start_line=7)
     def train(
@@ -221,6 +221,9 @@ class BinaryLogReg:
             "test_losses": [],
             "test_errors": [],
         }
+        for i in range(epochs):
+            RNG()
+            print(i)
         raise NotImplementedError("Your Code Goes Here")
 
 
