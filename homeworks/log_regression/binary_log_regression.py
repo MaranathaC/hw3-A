@@ -45,7 +45,6 @@ class BinaryLogReg:
         # Fill in with matrix with the correct shape
         self.weight: np.ndarray = None  # type: ignore
         self.bias: float = 0.0
-        # raise NotImplementedError("Your Code Goes Here")
 
     @problem.tag("hw3-A")
     def mu(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -80,7 +79,10 @@ class BinaryLogReg:
         Returns:
             float: Loss given X, y, self.weight, self.bias and self._lambda
         """
-        raise NotImplementedError("Your Code Goes Here")
+        result = 0
+        for i in range(X.shape[0]):
+            result += np.log(1 + np.exp(-y[i] * (self.bias + X[i] @ self.weight)))
+        return result / X.shape[0] + self._lambda * np.linalg.norm(self.weight) ** 2
 
     @problem.tag("hw3-A")
     def gradient_J_weight(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -162,6 +164,8 @@ class BinaryLogReg:
             learning_rate (float, optional): Learning rate of SGD/GD algorithm.
                 Defaults to 1e-4.
         """
+        if self.weight is None:
+            self.weight = np.zeros(X.shape[1])
         self.weight -= self.gradient_J_weight(X, y) * learning_rate
         self.bias -= self.gradient_J_bias(X, y) * learning_rate
 
@@ -221,10 +225,27 @@ class BinaryLogReg:
             "test_losses": [],
             "test_errors": [],
         }
+
         for i in range(epochs):
-            RNG()
-            print(i)
-        raise NotImplementedError("Your Code Goes Here")
+            permutation = RNG.permutation(X_train.shape[0])
+            X_train = X_train[permutation]
+            y_train = y_train[permutation]
+
+            for batch_idx in range(num_batches):
+                start_idx = batch_idx * batch_size
+                end_idx = min((batch_idx + 1) * batch_size, len(X_train))
+
+                X_batch = X_train[start_idx:end_idx]
+                y_batch = y_train[start_idx:end_idx]
+
+                self.step(X_batch, y_batch, learning_rate)
+
+            result["train_losses"].append(self.loss(X_train, y_train))
+            result["train_errors"].append(self.misclassification_error(X_train, y_train))
+            result["test_losses"].append(self.loss(X_test, y_test))
+            result["test_errors"].append(self.misclassification_error(X_test, y_test))
+
+        return result
 
 
 if __name__ == "__main__":
