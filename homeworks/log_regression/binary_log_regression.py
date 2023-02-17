@@ -164,8 +164,6 @@ class BinaryLogReg:
             learning_rate (float, optional): Learning rate of SGD/GD algorithm.
                 Defaults to 1e-4.
         """
-        if self.weight is None:
-            self.weight = np.zeros(X.shape[1])
         self.weight -= self.gradient_J_weight(X, y) * learning_rate
         self.bias -= self.gradient_J_bias(X, y) * learning_rate
 
@@ -226,6 +224,8 @@ class BinaryLogReg:
             "test_errors": [],
         }
 
+        self.weight = np.zeros(X_train.shape[1])
+
         for i in range(epochs):
             permutation = RNG.permutation(X_train.shape[0])
             X_train = X_train[permutation]
@@ -249,9 +249,49 @@ class BinaryLogReg:
 
 
 if __name__ == "__main__":
-    model = BinaryLogReg()
+    # model = BinaryLogReg()
     (x_train, y_train), (x_test, y_test) = load_2_7_mnist()
-    history = model.train(x_train, y_train, x_test, y_test)
+    # history = model.train(x_train, y_train, x_test, y_test)
+
+    # # Plot losses
+    # plt.plot(history["train_losses"], label="Train")
+    # plt.plot(history["test_losses"], label="Test")
+    # plt.xlabel("Epochs")
+    # plt.ylabel("Loss")
+    # plt.legend()
+    # plt.show()
+    #
+    # # Plot error
+    # plt.plot(history["train_errors"], label="Train")
+    # plt.plot(history["test_errors"], label="Test")
+    # plt.xlabel("Epochs")
+    # plt.ylabel("Misclassification Error")
+    # plt.legend()
+    # plt.show()
+    #
+    # # GD
+    # model = BinaryLogReg()
+    # history = model.train(x_train, y_train, x_test, y_test, batch_size=x_train.shape[0])
+    #
+    # # Plot losses
+    # plt.plot(history["train_losses"], label="Train")
+    # plt.plot(history["test_losses"], label="Test")
+    # plt.xlabel("Epochs")
+    # plt.ylabel("Loss")
+    # plt.legend()
+    # plt.show()
+    #
+    # # Plot error
+    # plt.plot(history["train_errors"], label="Train")
+    # plt.plot(history["test_errors"], label="Test")
+    # plt.xlabel("Epochs")
+    # plt.ylabel("Misclassification Error")
+    # plt.legend()
+    # plt.show()
+
+    # SGD with 1 data point
+    model = BinaryLogReg()
+    history = model.train(x_train, y_train, x_test, y_test, epochs=100, batch_size=1)
 
     # Plot losses
     plt.plot(history["train_losses"], label="Train")
