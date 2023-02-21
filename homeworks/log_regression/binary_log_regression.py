@@ -249,49 +249,51 @@ class BinaryLogReg:
 
 
 if __name__ == "__main__":
-    # model = BinaryLogReg()
     (x_train, y_train), (x_test, y_test) = load_2_7_mnist()
-    # history = model.train(x_train, y_train, x_test, y_test)
 
-    # # Plot losses
-    # plt.plot(history["train_losses"], label="Train")
-    # plt.plot(history["test_losses"], label="Test")
-    # plt.xlabel("Epochs")
-    # plt.ylabel("Loss")
-    # plt.legend()
-    # plt.show()
-    #
-    # # Plot error
-    # plt.plot(history["train_errors"], label="Train")
-    # plt.plot(history["test_errors"], label="Test")
-    # plt.xlabel("Epochs")
-    # plt.ylabel("Misclassification Error")
-    # plt.legend()
-    # plt.show()
-    #
-    # # GD
-    # model = BinaryLogReg()
-    # history = model.train(x_train, y_train, x_test, y_test, batch_size=x_train.shape[0])
-    #
-    # # Plot losses
-    # plt.plot(history["train_losses"], label="Train")
-    # plt.plot(history["test_losses"], label="Test")
-    # plt.xlabel("Epochs")
-    # plt.ylabel("Loss")
-    # plt.legend()
-    # plt.show()
-    #
-    # # Plot error
-    # plt.plot(history["train_errors"], label="Train")
-    # plt.plot(history["test_errors"], label="Test")
-    # plt.xlabel("Epochs")
-    # plt.ylabel("Misclassification Error")
-    # plt.legend()
-    # plt.show()
+    # GD
+    model = BinaryLogReg()
+    history = model.train(x_train, y_train, x_test, y_test, batch_size=x_train.shape[0], learning_rate=1)
+
+    # Plot losses
+    plt.plot(history["train_losses"], label="Train")
+    plt.plot(history["test_losses"], label="Test")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
+
+    # Plot error
+    plt.plot(history["train_errors"], label="Train")
+    plt.plot(history["test_errors"], label="Test")
+    plt.xlabel("Epochs")
+    plt.ylabel("Misclassification Error")
+    plt.legend()
+    plt.show()
 
     # SGD with 1 data point
     model = BinaryLogReg()
-    history = model.train(x_train, y_train, x_test, y_test, epochs=100, batch_size=1)
+    history = model.train(x_train, y_train, x_test, y_test, learning_rate=1e-4, batch_size=1)
+
+    # Plot losses
+    plt.plot(history["train_losses"], label="Train")
+    plt.plot(history["test_losses"], label="Test")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
+
+    # Plot error
+    plt.plot(history["train_errors"], label="Train")
+    plt.plot(history["test_errors"], label="Test")
+    plt.xlabel("Epochs")
+    plt.ylabel("Misclassification Error")
+    plt.legend()
+    plt.show()
+
+    # SGD with 100 data point
+    model = BinaryLogReg()
+    history = model.train(x_train, y_train, x_test, y_test)
 
     # Plot losses
     plt.plot(history["train_losses"], label="Train")

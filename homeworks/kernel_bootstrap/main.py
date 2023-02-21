@@ -41,7 +41,7 @@ def poly_kernel(x_i: np.ndarray, x_j: np.ndarray, d: int) -> np.ndarray:
             They apply an operation similar to xx^T (if x is a vector), but not necessarily with multiplication.
             To use it simply append .outer to function. For example: np.add.outer, np.divide.outer
     """
-    raise NotImplementedError("Your Code Goes Here")
+    return (np.outer(x_i, x_j) + 1) ** d
 
 
 @problem.tag("hw3-A")
@@ -66,7 +66,7 @@ def rbf_kernel(x_i: np.ndarray, x_j: np.ndarray, gamma: float) -> np.ndarray:
             They apply an operation similar to xx^T (if x is a vector), but not necessarily with multiplication.
             To use it simply append .outer to function. For example: np.add.outer, np.divide.outer
     """
-    raise NotImplementedError("Your Code Goes Here")
+    return np.exp(-gamma * np.add.outer(x_i, -x_j) ** 2)
 
 
 @problem.tag("hw3-A")
@@ -89,7 +89,10 @@ def train(
     Returns:
         np.ndarray: Array of shape (n,) containing alpha hat as described in the pdf.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    n = len(x)
+    K = kernel_function(x, x, kernel_param)
+    y = y.reshape((n, 1))
+    return np.linalg.solve(K + _lambda * np.eye(n), y)
 
 
 @problem.tag("hw3-A", start_line=1)
@@ -120,7 +123,23 @@ def cross_validation(
         float: Average loss of trained function on validation sets across folds.
     """
     fold_size = len(x) // num_folds
-    raise NotImplementedError("Your Code Goes Here")
+    n = x.shape[0]
+
+    mse = 0
+
+    for i in range(num_folds):
+        val_indices = range(i * fold_size, (i + 1) * fold_size)
+        training_indices = list(set(range(n)) - set(val_indices))
+
+        xtrain, ytrain = x[training_indices], y[training_indices]
+        xval, yval = x[val_indices], y[val_indices]
+
+        alpha = train(xtrain, ytrain, kernel_function, kernel_param, _lambda)
+        y_pred = alpha @ kernel_function(xval, yval, kernel_param)
+
+        mse += np.mean((y_pred - yval) ** 2)
+
+    return mse / num_folds
 
 
 @problem.tag("hw3-A")
@@ -148,7 +167,14 @@ def rbf_param_search(
         - If using random search we recommend sampling lambda from distribution 10**i, where i~Unif(-5, -1)
         - If using grid search we recommend choosing possible lambdas to 10**i, where i=linspace(-5, -1)
     """
-    raise NotImplementedError("Your Code Goes Here")
+    gamma = 1 / np.median(np.outer(x, x).reshape(len(x) ** 2)) ** 2
+    i = np.linspace(-5, -1)
+    err = np.zeros(len(i))
+
+    for j, _lambda in enumerate(10**i):
+        err[j] = cross_validation(x, y, rbf_kernel, gamma, _lambda, num_folds)
+
+    return 10 ** i[np.argmin(err)], gamma
 
 
 @problem.tag("hw3-A")
@@ -197,7 +223,9 @@ def main():
             To avoid this call plt.ylim(-6, 6).
     """
     (x_30, y_30), (x_300, y_300), (x_1000, y_1000) = load_dataset("kernel_bootstrap")
-    raise NotImplementedError("Your Code Goes Here")
+    _lambda, gamma = rbf_param_search(x_30, y_30, 10)
+    print(_lambda)
+    print(gamma)
 
 
 if __name__ == "__main__":
