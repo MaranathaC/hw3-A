@@ -91,8 +91,7 @@ def train(
     """
     n = len(x)
     K = kernel_function(x, x, kernel_param)
-    y = y.reshape((n, 1))
-    return np.linalg.solve(K + _lambda * np.eye(n), y)
+    return np.linalg.solve(K + _lambda * np.eye(n), y.reshape((n, 1)))
 
 
 @problem.tag("hw3-A", start_line=1)
@@ -131,13 +130,13 @@ def cross_validation(
         val_indices = range(i * fold_size, (i + 1) * fold_size)
         training_indices = list(set(range(n)) - set(val_indices))
 
-        xtrain, ytrain = x[training_indices], y[training_indices]
-        xval, yval = x[val_indices], y[val_indices]
+        x_train, y_train = x[training_indices], y[training_indices]
+        x_val, y_val = x[val_indices], y[val_indices]
 
-        alpha = train(xtrain, ytrain, kernel_function, kernel_param, _lambda)
-        y_pred = alpha @ kernel_function(xval, yval, kernel_param)
+        alpha = train(x_train, y_train, kernel_function, kernel_param, _lambda)
+        y_pred = kernel_function(x_val, x_train, kernel_param) @ alpha
 
-        mse += np.mean((y_pred - yval) ** 2)
+        mse += np.mean((y_pred.T - y_val) ** 2)
 
     return mse / num_folds
 
@@ -205,7 +204,15 @@ def poly_param_search(
         - If using grid search we recommend choosing possible lambdas to 10**i, where i=linspace(-5, -1)
             and possible ds to [7, 8, ..., 20, 21]
     """
-    raise NotImplementedError("Your Code Goes Here")
+    i = np.linspace(-5, -1)
+    ds = np.arange(5, 26, 1)
+    err = np.zeros((len(i), len(ds)))
+    for j, _lambda in enumerate(10 ** i):
+        for k, d in enumerate(ds):
+            err[j][k] = cross_validation(x, y, poly_kernel, d, _lambda, num_folds)
+    j, k = np.unravel_index(np.argmin(err), err.shape)
+    return 10 ** i[j], ds[k]
+
 
 @problem.tag("hw3-A", start_line=1)
 def main():
@@ -224,8 +231,7 @@ def main():
     """
     (x_30, y_30), (x_300, y_300), (x_1000, y_1000) = load_dataset("kernel_bootstrap")
     _lambda, gamma = rbf_param_search(x_30, y_30, 10)
-    print(_lambda)
-    print(gamma)
+    _lambda_p, d = poly_param_search(x_30, y_30, 10)
 
 
 if __name__ == "__main__":
