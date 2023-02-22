@@ -230,8 +230,71 @@ def main():
             To avoid this call plt.ylim(-6, 6).
     """
     (x_30, y_30), (x_300, y_300), (x_1000, y_1000) = load_dataset("kernel_bootstrap")
-    _lambda, gamma = rbf_param_search(x_30, y_30, 10)
-    _lambda_p, d = poly_param_search(x_30, y_30, 10)
+    _lambda_rbf, gamma = rbf_param_search(x_30, y_30, len(x_30))
+    print("RBF30 Lambda: ", _lambda_rbf, " Gamma: ", gamma)
+
+    _lambda_poly, d = poly_param_search(x_30, y_30, len(x_30))
+    print("Poly30 Lambda: ", _lambda_poly, " D: ", d)
+
+    # RBF Kernel Graph 30 data points
+    x_plot = np.linspace(0, 1, 100)
+    y_true = f_true(x_plot)
+
+    alpha_rbf = train(x_30, y_30, rbf_kernel, gamma, _lambda_rbf)
+    y_rbf = rbf_kernel(x_plot, x_30, gamma) @ alpha_rbf
+
+    fig, ax = plt.subplots()
+    ax.plot(x_plot, y_true, label='True Function')
+    ax.scatter(x_30, y_30, label='Data Points')
+    ax.plot(x_plot, y_rbf, label='RBF Kernel')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+    plt.show()
+
+    # Poly kernel Graph 30 data points
+    alpha_poly = train(x_30, y_30, poly_kernel, d, _lambda_poly)
+    y_poly = poly_kernel(x_plot, x_30, d) @ alpha_poly
+
+    fig, ax = plt.subplots()
+    ax.plot(x_plot, y_true, label='True Function')
+    ax.scatter(x_30, y_30, label='Data Points')
+    ax.plot(x_plot, y_poly, label='Poly Kernel')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+    plt.show()
+
+    _lambda_rbf, gamma = rbf_param_search(x_300, y_300, 10)
+    print("RBF300 Lambda: ", _lambda_rbf, " Gamma: ", gamma)
+    _lambda_poly, d = poly_param_search(x_300, y_300, 10)
+    print("Poly300 Lambda: ", _lambda_poly, " D: ", d)
+
+    # RBF Graph 300 data points
+    alpha_rbf = train(x_300, y_300, rbf_kernel, gamma, _lambda_rbf)
+    y_rbf = rbf_kernel(x_plot, x_300, gamma) @ alpha_rbf
+
+    fig, ax = plt.subplots()
+    ax.plot(x_plot, y_true, label='True Function')
+    ax.scatter(x_300, y_300, label='Data Points')
+    ax.plot(x_plot, y_rbf, label='RBF Kernel')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+    plt.show()
+
+    # Poly kernel Graph 300 data points
+    alpha_poly = train(x_300, y_300, poly_kernel, d, _lambda_poly)
+    y_poly = poly_kernel(x_plot, x_300, d) @ alpha_poly
+
+    fig, ax = plt.subplots()
+    ax.plot(x_plot, y_true, label='True Function')
+    ax.scatter(x_300, y_300, label='Data Points')
+    ax.plot(x_plot, y_poly, label='Poly Kernel')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
