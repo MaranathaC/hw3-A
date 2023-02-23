@@ -26,7 +26,10 @@ class F1(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        raise NotImplementedError("Your Code Goes Here")
+        self.layer1 = Parameter(torch.randn(d, h))
+        self.layer2 = Parameter(torch.randn(h, k))
+        self.bias1 = Parameter(torch.zeros(h))
+        self.bias2 = Parameter(torch.zeros(k))
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -48,7 +51,10 @@ class F1(Module):
         Returns:
             torch.Tensor: FloatTensor of shape (n, k). Prediction.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        output = x @ self.layer1 + self.bias1
+        output = relu(output)
+        output = output @ self.layer2 + self.bias2
+        return output
 
 
 class F2(Module):
@@ -63,7 +69,6 @@ class F2(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        raise NotImplementedError("Your Code Goes Here")
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -125,7 +130,29 @@ def main():
     y = torch.from_numpy(y).long()
     x_test = torch.from_numpy(x_test).float()
     y_test = torch.from_numpy(y_test).long()
-    raise NotImplementedError("Your Code Goes Here")
+
+    train_dataset = TensorDataset(x, y)
+    test_dataset = TensorDataset(x_test, y_test)
+
+    batch_size = 32
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size)
+
+    iteration = math.ceil(len(x) / batch_size)
+
+    f1 = F1(64, 784, 10)
+    optimizer = Adam(f1.parameters())
+
+    epochs = 10
+    train_losses, train_accs = [], []
+    test_losses, test_accs = [], []
+
+    data_iter = iter(train_loader)
+
+    for i in range(epochs):
+        for _, (features, labels) in enumerate(train_loader):
+            output = f1.forward(features)
+            loss = cross_entropy(input=output, target=labels)
 
 
 if __name__ == "__main__":
