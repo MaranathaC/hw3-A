@@ -26,10 +26,10 @@ class F1(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        self.layer1 = Parameter(torch.randn(d, h))
-        self.layer2 = Parameter(torch.randn(h, k))
-        self.bias1 = Parameter(torch.zeros(h))
-        self.bias2 = Parameter(torch.zeros(k))
+        self.input_weights = Parameter(torch.randn(d, h))
+        self.layer1_weights = Parameter(torch.randn(h, k))
+        self.input_bias = Parameter(torch.zeros(h))
+        self.layer1_bias = Parameter(torch.zeros(k))
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -51,9 +51,9 @@ class F1(Module):
         Returns:
             torch.Tensor: FloatTensor of shape (n, k). Prediction.
         """
-        output = x @ self.layer1 + self.bias1
+        output = x @ self.input_weights + self.input_bias
         output = relu(output)
-        output = output @ self.layer2 + self.bias2
+        output = output @ self.layer1_weights + self.layer1_bias
         return output
 
 
@@ -69,6 +69,12 @@ class F2(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
+        self.input_weights = Parameter(torch.randn(d, h0))
+        self.input_bias = Parameter(torch.zeros(h0))
+        self.layer1_weights = Parameter(torch.randn(h0, h1))
+        self.layer1_bias = Parameter(torch.zeros(h1))
+        self.layer2_weights = Parameter(torch.randn(h1, k))
+        self.layer2_bias = Parameter(torch.zeros(k))
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -90,7 +96,12 @@ class F2(Module):
         Returns:
             torch.Tensor: FloatTensor of shape (n, k). Prediction.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        output = x @ self.input_weights + self.input_bias
+        output = relu(output)
+        output = output @ self.layer1_weights + self.layer1_bias
+        output = relu(output)
+        output = output @ self.layer2_weights + self.layer2_bias
+        return output
 
 
 @problem.tag("hw3-A")
@@ -109,7 +120,37 @@ def train(model: Module, optimizer: Adam, train_loader: DataLoader) -> List[floa
     Returns:
         List[float]: List containing average loss for each epoch.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    avg_loss = []
+    avg_acc = []
+
+    while True:
+        total_loss = 0
+        total_correct = 0
+        num_predictions = 0
+
+        for _, (images, labels) in enumerate(train_loader):
+            optimizer.zero_grad()
+
+            output = model.forward(images)
+            loss = cross_entropy(input=output, target=labels)
+            loss.backward()
+            optimizer.step()
+
+            output = torch.argmax(output, dim=1)
+            num_predictions += len(labels)
+            correct_predictions = torch.eq(output, labels)
+            num_correct = torch.sum(correct_predictions).item()
+
+            total_loss += loss.data
+            total_correct += num_correct
+
+        avg_loss.append(total_loss / num_predictions)
+        avg_acc.append(total_correct / num_predictions)
+
+        if avg_acc[-1] >= .90:
+            break
+
+    return avg_loss
 
 
 @problem.tag("hw3-A", start_line=5)
@@ -134,40 +175,24 @@ def main():
     train_dataset = TensorDataset(x, y)
     test_dataset = TensorDataset(x_test, y_test)
 
-    batch_size = 32
+    batch_size = 64
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size)
+    test_loader = DataLoader(dataset=test_dataset)
 
     f1 = F1(64, 784, 10)
-    optimizer = Adam(f1.parameters())
+    optimizer1 = Adam(f1.parameters(), lr=1e-5)
 
-    epochs = 30
-    train_losses, train_accs = [], []
-    test_losses, test_accs = [], []
+    f2 = F2(32, 32, 784, 10)
+    optimizer2 = Adam(f2.parameters(), lr=1e-5)
 
-    iterations = math.ceil(len(x) / batch_size)
+    train_loss1 = train(f1, optimizer1, train_loader)
+    train_loss2 = train(f2, optimizer2, train_loader)
 
-    for i in range(epochs):
-        total_loss = 0
-        total_correct = 0
+    test_loss, test_acc = [], []
 
-        for _, (features, labels) in enumerate(train_loader):
-            output = f1.forward(features)
-            loss = cross_entropy(input=output, target=labels)
-            loss.backward()
-            optimizer.step()
-
-            output = torch.argmax(output, dim=1)
-            correct_predictions = torch.eq(output, labels)
-            num_correct = torch.sum(correct_predictions).item()
-
-            total_loss += loss
-            total_correct += num_correct
-
-        train_losses.append(total_loss / iterations)
-        train_accs.append(total_correct / len(x))
-
-    print(train_accs)
+    epochs = torch.arange(len(train_loss1))
+    plt.plot(epochs, train_loss1)
+    plt.show()
 
 
 if __name__ == "__main__":
