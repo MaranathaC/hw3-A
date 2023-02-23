@@ -138,21 +138,36 @@ def main():
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size)
 
-    iteration = math.ceil(len(x) / batch_size)
-
     f1 = F1(64, 784, 10)
     optimizer = Adam(f1.parameters())
 
-    epochs = 10
+    epochs = 30
     train_losses, train_accs = [], []
     test_losses, test_accs = [], []
 
-    data_iter = iter(train_loader)
+    iterations = math.ceil(len(x) / batch_size)
 
     for i in range(epochs):
+        total_loss = 0
+        total_correct = 0
+
         for _, (features, labels) in enumerate(train_loader):
             output = f1.forward(features)
             loss = cross_entropy(input=output, target=labels)
+            loss.backward()
+            optimizer.step()
+
+            output = torch.argmax(output, dim=1)
+            correct_predictions = torch.eq(output, labels)
+            num_correct = torch.sum(correct_predictions).item()
+
+            total_loss += loss
+            total_correct += num_correct
+
+        train_losses.append(total_loss / iterations)
+        train_accs.append(total_correct / len(x))
+
+    print(train_accs)
 
 
 if __name__ == "__main__":
