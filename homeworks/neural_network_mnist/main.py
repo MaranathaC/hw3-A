@@ -30,8 +30,8 @@ class F1(Module):
         uniform_dist = Uniform(-alpha, alpha)
         self.input_weights = Parameter(uniform_dist.sample((d, h)))
         self.layer1_weights = Parameter(uniform_dist.sample((h, k)))
-        self.input_bias = Parameter(torch.zeros(h))
-        self.layer1_bias = Parameter(torch.zeros(k))
+        self.input_bias = Parameter(uniform_dist.sample((h,)))
+        self.layer1_bias = Parameter(uniform_dist.sample((k,)))
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -74,11 +74,11 @@ class F2(Module):
         alpha = 1 / math.sqrt(d)
         uniform_dist = Uniform(-alpha, alpha)
         self.input_weights = Parameter(torch.randn(d, h0))
-        self.input_bias = Parameter(torch.zeros(h0))
+        self.input_bias = Parameter(uniform_dist.sample((h0,)))
         self.layer1_weights = Parameter(torch.randn(h0, h1))
-        self.layer1_bias = Parameter(torch.zeros(h1))
+        self.layer1_bias = Parameter(uniform_dist.sample((h1,)))
         self.layer2_weights = Parameter(torch.randn(h1, k))
-        self.layer2_bias = Parameter(torch.zeros(k))
+        self.layer2_bias = Parameter(uniform_dist.sample((k,)))
 
     @problem.tag("hw3-A")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -183,26 +183,27 @@ def main():
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(dataset=test_dataset)
 
-    f1 = F1(64, 784, 10)
-    optimizer1 = Adam(f1.parameters(), lr=1e-3)
-
-    # f2 = F2(32, 32, 784, 10)
-    # optimizer2 = Adam(f2.parameters(), lr=7e-3)
-
-    train_loss1 = train(f1, optimizer1, train_loader)
-    # train_loss2 = train(f2, optimizer2, train_loader)
-
-    epochs = torch.arange(len(train_loss1))
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.plot(epochs, train_loss1)
-    plt.show()
-
-    # epochs = torch.arange(len(train_loss2))
+    # f1 = F1(64, 784, 10)
+    # optimizer1 = Adam(f1.parameters(), lr=1e-3)
+    #
+    # train_loss1 = train(f1, optimizer1, train_loader)
+    #
+    # epochs = torch.arange(len(train_loss1))
     # plt.xlabel("Epoch")
     # plt.ylabel("Loss")
-    # plt.plot(epochs, train_loss2)
+    # plt.plot(epochs, train_loss1)
     # plt.show()
+
+    f2 = F2(32, 32, 784, 10)
+    optimizer2 = Adam(f2.parameters(), lr=7e-3) # adjust lr
+
+    train_loss2 = train(f2, optimizer2, train_loader)
+
+    epochs = torch.arange(len(train_loss2))
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.plot(epochs, train_loss2)
+    plt.show()
 
 
 if __name__ == "__main__":
