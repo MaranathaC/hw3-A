@@ -26,8 +26,10 @@ class F1(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
-        self.input_weights = Parameter(torch.randn(d, h))
-        self.layer1_weights = Parameter(torch.randn(h, k))
+        alpha = 1 / math.sqrt(d)
+        uniform_dist = Uniform(-alpha, alpha)
+        self.input_weights = Parameter(uniform_dist.sample((d, h)))
+        self.layer1_weights = Parameter(uniform_dist.sample((h, k)))
         self.input_bias = Parameter(torch.zeros(h))
         self.layer1_bias = Parameter(torch.zeros(k))
 
@@ -69,6 +71,8 @@ class F2(Module):
             k (int): Output dimension/number of classes.
         """
         super().__init__()
+        alpha = 1 / math.sqrt(d)
+        uniform_dist = Uniform(-alpha, alpha)
         self.input_weights = Parameter(torch.randn(d, h0))
         self.input_bias = Parameter(torch.zeros(h0))
         self.layer1_weights = Parameter(torch.randn(h0, h1))
@@ -147,7 +151,7 @@ def train(model: Module, optimizer: Adam, train_loader: DataLoader) -> List[floa
         avg_loss.append(total_loss / num_predictions)
         avg_acc.append(total_correct / num_predictions)
 
-        if avg_acc[-1] >= .90:
+        if avg_acc[-1] >= .99:
             break
 
     return avg_loss
@@ -180,19 +184,25 @@ def main():
     test_loader = DataLoader(dataset=test_dataset)
 
     f1 = F1(64, 784, 10)
-    optimizer1 = Adam(f1.parameters(), lr=1e-5)
+    optimizer1 = Adam(f1.parameters(), lr=1e-3)
 
-    f2 = F2(32, 32, 784, 10)
-    optimizer2 = Adam(f2.parameters(), lr=1e-5)
+    # f2 = F2(32, 32, 784, 10)
+    # optimizer2 = Adam(f2.parameters(), lr=7e-3)
 
     train_loss1 = train(f1, optimizer1, train_loader)
-    train_loss2 = train(f2, optimizer2, train_loader)
-
-    test_loss, test_acc = [], []
+    # train_loss2 = train(f2, optimizer2, train_loader)
 
     epochs = torch.arange(len(train_loss1))
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.plot(epochs, train_loss1)
     plt.show()
+
+    # epochs = torch.arange(len(train_loss2))
+    # plt.xlabel("Epoch")
+    # plt.ylabel("Loss")
+    # plt.plot(epochs, train_loss2)
+    # plt.show()
 
 
 if __name__ == "__main__":

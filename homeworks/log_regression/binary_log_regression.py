@@ -253,13 +253,14 @@ if __name__ == "__main__":
 
     # GD
     model = BinaryLogReg()
-    history = model.train(x_train, y_train, x_test, y_test, batch_size=x_train.shape[0], learning_rate=1)
+    history = model.train(x_train, y_train, x_test, y_test, batch_size=x_train.shape[0], learning_rate=6e-1)
 
     # Plot losses
     plt.plot(history["train_losses"], label="Train")
     plt.plot(history["test_losses"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
+    plt.title("Gradient Descent Loss")
     plt.legend()
     plt.show()
 
@@ -268,6 +269,7 @@ if __name__ == "__main__":
     plt.plot(history["test_errors"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Misclassification Error")
+    plt.title("Gradient Descent Error")
     plt.legend()
     plt.show()
 
@@ -280,6 +282,7 @@ if __name__ == "__main__":
     plt.plot(history["test_losses"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
+    plt.title("SGD 1 Data Point Loss")
     plt.legend()
     plt.show()
 
@@ -288,6 +291,7 @@ if __name__ == "__main__":
     plt.plot(history["test_errors"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Misclassification Error")
+    plt.title("SGD 1 Data Point Error")
     plt.legend()
     plt.show()
 
@@ -300,6 +304,7 @@ if __name__ == "__main__":
     plt.plot(history["test_losses"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
+    plt.title("SGD 100 Data Point Loss")
     plt.legend()
     plt.show()
 
@@ -308,5 +313,6 @@ if __name__ == "__main__":
     plt.plot(history["test_errors"], label="Test")
     plt.xlabel("Epochs")
     plt.ylabel("Misclassification Error")
+    plt.title("SGD 100 Data Point Error")
     plt.legend()
     plt.show()
