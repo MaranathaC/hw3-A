@@ -250,6 +250,7 @@ def main():
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.legend()
+    plt.title("RBF Kernel with 30 data points")
     plt.show()
 
     # Poly kernel Graph 30 data points
@@ -263,6 +264,7 @@ def main():
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.legend()
+    plt.title("Poly Kernel with 30 data points")
     plt.show()
 
     _lambda_rbf, gamma = rbf_param_search(x_300, y_300, 10)
@@ -281,6 +283,7 @@ def main():
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.legend()
+    plt.title("RBF Kernel with 300 data points")
     plt.show()
 
     # Poly kernel Graph 300 data points
@@ -294,6 +297,7 @@ def main():
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.legend()
+    plt.title("Poly Kernel with 300 data points")
     plt.show()
 
 

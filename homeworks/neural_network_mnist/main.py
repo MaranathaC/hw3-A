@@ -126,11 +126,13 @@ def train(model: Module, optimizer: Adam, train_loader: DataLoader) -> List[floa
     """
     avg_loss = []
     avg_acc = []
+    i = 0
 
     while True:
         total_loss = 0
         total_correct = 0
         num_predictions = 0
+        i += 1
 
         for _, (images, labels) in enumerate(train_loader):
             optimizer.zero_grad()
@@ -150,6 +152,7 @@ def train(model: Module, optimizer: Adam, train_loader: DataLoader) -> List[floa
 
         avg_loss.append(total_loss / num_predictions)
         avg_acc.append(total_correct / num_predictions)
+        print(i, ": ", avg_loss[-1], avg_acc[-1])
 
         if avg_acc[-1] >= .99:
             break
@@ -177,33 +180,50 @@ def main():
     y_test = torch.from_numpy(y_test).long()
 
     train_dataset = TensorDataset(x, y)
-    test_dataset = TensorDataset(x_test, y_test)
 
-    batch_size = 64
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(dataset=test_dataset)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
 
-    # f1 = F1(64, 784, 10)
-    # optimizer1 = Adam(f1.parameters(), lr=1e-3)
-    #
-    # train_loss1 = train(f1, optimizer1, train_loader)
-    #
-    # epochs = torch.arange(len(train_loss1))
-    # plt.xlabel("Epoch")
-    # plt.ylabel("Loss")
-    # plt.plot(epochs, train_loss1)
-    # plt.show()
+    f1 = F1(64, 784, 10)
+    optimizer1 = Adam(f1.parameters(), lr=1e-3)
+
+    train_loss1 = train(f1, optimizer1, train_loader)
+
+    epochs = torch.arange(len(train_loss1))
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("F1 Train Loss vs Epoch")
+    plt.plot(epochs, train_loss1)
+    plt.show()
+
+    f1_test_pred = f1.forward(x_test)
+    loss1 = cross_entropy(input=f1_test_pred, target=y_test)
+    print("F1 test loss: ", loss1)
+    f1_test_pred = torch.argmax(f1_test_pred, dim=1)
+    correct_predictions = torch.eq(f1_test_pred, y_test)
+    num_correct = torch.sum(correct_predictions).item()
+    print("F1 test Acc: ", num_correct / len(y_test))
+
+    train_loader = DataLoader(dataset=train_dataset, batch_size=32, shuffle=True)
 
     f2 = F2(32, 32, 784, 10)
-    optimizer2 = Adam(f2.parameters(), lr=7e-3) # adjust lr
+    optimizer2 = Adam(f2.parameters(), lr=5e-3)
 
     train_loss2 = train(f2, optimizer2, train_loader)
 
     epochs = torch.arange(len(train_loss2))
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
+    plt.title("F2 Train Loss vs Epoch")
     plt.plot(epochs, train_loss2)
     plt.show()
+
+    f2_test_pred = f2.forward(x_test)
+    loss2 = cross_entropy(input=f2_test_pred, target=y_test)
+    print("F2 test loss: ", loss2)
+    f2_test_pred = torch.argmax(f2_test_pred, dim=1)
+    correct_predictions = torch.eq(f2_test_pred, y_test)
+    num_correct = torch.sum(correct_predictions).item()
+    print("F2 test Acc: ", num_correct / len(y_test))
 
 
 if __name__ == "__main__":
